@@ -161,6 +161,12 @@ em { background: linear-gradient(110deg, var(--cyan), var(--lime)); background-c
 .pulse-wave::after { border-top: 2px solid var(--orange); content: ''; inset: 0; position: absolute; transform: translateX(35px) skewY(20deg); }
 .pulse-read { bottom: 18px; color: var(--orange); font-family: var(--mono); font-size: .6rem; position: absolute; right: 20px; }
 .visual-chat { background: radial-gradient(circle at 30% 30%, rgba(147,181,255,.32), transparent 32%), #111627; }
+.visual-portfolio { background: radial-gradient(circle at 70% 30%, rgba(197,239,120,.2), transparent 32%), linear-gradient(140deg, #172531, #101923); }
+.portfolio-frame { border: 1px solid rgba(197,239,120,.55); height: 125px; position: absolute; transform: rotate(-8deg); width: 190px; }
+.portfolio-frame::before { border-bottom: 1px solid rgba(197,239,120,.35); content: ''; left: 0; position: absolute; right: 0; top: 22px; }
+.portfolio-frame span { background: var(--orange); border-radius: 50%; display: inline-block; height: 5px; margin: 9px 0 0 9px; width: 5px; }
+.portfolio-frame span + span { background: var(--cyan); margin-left: 4px; }
+.portfolio-frame span + span + span { background: var(--lime); }
 .chat-bubble { background: rgba(147,181,255,.15); border: 1px solid rgba(147,181,255,.35); border-radius: 12px; color: var(--soft); font-family: var(--mono); font-size: .54rem; left: 12%; padding: 9px 11px; position: absolute; top: 19%; }
 .chat-bubble.reply { bottom: 17%; left: auto; right: 12%; top: auto; }
 .project-body { padding: 23px 21px 25px; }

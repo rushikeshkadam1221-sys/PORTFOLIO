@@ -161,9 +161,10 @@ document.querySelectorAll('.assistant-prompts button').forEach(button => button.
 
 document.getElementById('contactForm').addEventListener('submit', event => {
     event.preventDefault();
-    const status = document.getElementById('formStatus');
-    status.textContent = 'Message staged locally. Thanks for reaching out.';
-    event.target.reset();
+    const subject = encodeURIComponent(document.getElementById('subject').value);
+    const body = encodeURIComponent(`Name: ${document.getElementById('name').value}\nEmail: ${document.getElementById('email').value}\n\n${document.getElementById('message').value}`);
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=rushikeshkadam1221@gmail.com&su=${subject}&body=${body}`;
+    window.open(gmailUrl, '_blank', 'noopener,noreferrer');
 });
 
 document.querySelectorAll('.magnetic').forEach(element => {
