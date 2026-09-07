@@ -1,311 +1,173 @@
-/* ========================================
-   DOM Elements
-   ======================================== */
-const navbar = document.getElementById('navbar');
-const navMenu = document.getElementById('navMenu');
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isTouch = window.matchMedia('(pointer: coarse)').matches;
+
+const loader = document.getElementById('loader');
+window.addEventListener('load', () => window.setTimeout(() => loader.classList.add('loaded'), prefersReducedMotion ? 0 : 1500));
+
+const header = document.getElementById('siteHeader');
+const nav = document.getElementById('siteNav');
 const menuToggle = document.getElementById('menuToggle');
-const navLinks = document.querySelectorAll('.nav-link');
-const backToTopBtn = document.getElementById('backToTop');
-const contactForm = document.getElementById('contactForm');
-const formInputs = {
-    name: document.getElementById('name'),
-    email: document.getElementById('email'),
-    subject: document.getElementById('subject'),
-    message: document.getElementById('message')
-};
-const errorMessages = {
-    name: document.getElementById('nameError'),
-    email: document.getElementById('emailError'),
-    subject: document.getElementById('subjectError'),
-    message: document.getElementById('messageError')
-};
-const formSuccess = document.getElementById('formSuccess');
-const revealElements = document.querySelectorAll('.reveal');
-
-/* ========================================
-   Mobile Menu Toggle
-   ======================================== */
+const navLinks = [...document.querySelectorAll('.nav-link')];
 menuToggle.addEventListener('click', () => {
-    menuToggle.classList.toggle('active');
-    navMenu.classList.toggle('active');
+    const open = nav.classList.toggle('open');
+    menuToggle.classList.toggle('open', open);
+    menuToggle.setAttribute('aria-expanded', String(open));
 });
+navLinks.forEach(link => link.addEventListener('click', () => {
+    nav.classList.remove('open');
+    menuToggle.classList.remove('open');
+    menuToggle.setAttribute('aria-expanded', 'false');
+}));
 
-// Close menu when a nav link is clicked
-navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-        menuToggle.classList.remove('active');
-        navMenu.classList.remove('active');
-    });
-});
-
-// Close menu when clicking outside
-document.addEventListener('click', (e) => {
-    if (!navbar.contains(e.target) && navMenu.classList.contains('active')) {
-        menuToggle.classList.remove('active');
-        navMenu.classList.remove('active');
-    }
-});
-
-/* ========================================
-   Sticky Navbar with Scroll Effect
-   ======================================== */
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-    } else {
-        navbar.classList.remove('scrolled');
-    }
-
-    // Show/hide back-to-top button
-    if (window.scrollY > 300) {
-        backToTopBtn.classList.add('active');
-    } else {
-        backToTopBtn.classList.remove('active');
-    }
-
-    // Update active nav link
-    updateActiveNavLink();
-});
-
-/* ========================================
-   Active Navigation Link Based on Section
-   ======================================== */
-function updateActiveNavLink() {
-    const sections = document.querySelectorAll('section[id]');
-    let currentSection = '';
-
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
-
-        if (window.scrollY >= sectionTop - 150) {
-            currentSection = section.getAttribute('id');
-        }
-    });
-
-    navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === `#${currentSection}`) {
-            link.classList.add('active');
-        }
-    });
-}
-
-/* ========================================
-   Smooth Scrolling
-   ======================================== */
-navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-        const href = link.getAttribute('href');
-        if (href.startsWith('#')) {
-            e.preventDefault();
-            const target = document.querySelector(href);
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        }
-    });
-});
-
-// Smooth scroll for back-to-top button
-backToTopBtn.addEventListener('click', () => {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-});
-
-/* ========================================
-   Scroll Reveal Animation with IntersectionObserver
-   ======================================== */
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
+const sections = [...document.querySelectorAll('main section[id]')];
+const updateScrollState = () => {
+    header.classList.toggle('scrolled', window.scrollY > 35);
+    const current = sections.reduce((active, section) => window.scrollY >= section.offsetTop - 180 ? section.id : active, 'home');
+    navLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === `#${current}`));
 };
+window.addEventListener('scroll', updateScrollState, { passive: true });
+updateScrollState();
 
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('active');
-            observer.unobserve(entry.target);
-        }
-    });
-}, observerOptions);
-
-// Observe all reveal elements
-revealElements.forEach(element => {
-    observer.observe(element);
+document.querySelectorAll('.reveal-up').forEach(element => {
+    if (prefersReducedMotion) { element.classList.add('visible'); return; }
+    new IntersectionObserver(entries => entries.forEach(entry => {
+        if (entry.isIntersecting) { entry.target.classList.add('visible'); }
+    }), { threshold: 0.14 }).observe(element);
 });
 
-/* ========================================
-   Contact Form Validation
-   ======================================== */
-
-// Clear error on input
-Object.keys(formInputs).forEach(key => {
-    formInputs[key].addEventListener('input', () => {
-        errorMessages[key].textContent = '';
-        errorMessages[key].style.display = 'none';
-    });
-});
-
-// Email validation helper
-function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
-
-// Form submission
-contactForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    // Reset error messages
-    Object.keys(errorMessages).forEach(key => {
-        errorMessages[key].textContent = '';
-        errorMessages[key].style.display = 'none';
-    });
-
-    // Validation
-    let isValid = true;
-
-    // Name validation
-    const nameValue = formInputs.name.value.trim();
-    if (nameValue === '') {
-        errorMessages.name.textContent = 'Please enter your name';
-        errorMessages.name.style.display = 'block';
-        isValid = false;
-    } else if (nameValue.length < 2) {
-        errorMessages.name.textContent = 'Name must be at least 2 characters';
-        errorMessages.name.style.display = 'block';
-        isValid = false;
-    }
-
-    // Email validation
-    const emailValue = formInputs.email.value.trim();
-    if (emailValue === '') {
-        errorMessages.email.textContent = 'Please enter your email';
-        errorMessages.email.style.display = 'block';
-        isValid = false;
-    } else if (!isValidEmail(emailValue)) {
-        errorMessages.email.textContent = 'Please enter a valid email address';
-        errorMessages.email.style.display = 'block';
-        isValid = false;
-    }
-
-    // Subject validation
-    const subjectValue = formInputs.subject.value.trim();
-    if (subjectValue === '') {
-        errorMessages.subject.textContent = 'Please enter a subject';
-        errorMessages.subject.style.display = 'block';
-        isValid = false;
-    } else if (subjectValue.length < 3) {
-        errorMessages.subject.textContent = 'Subject must be at least 3 characters';
-        errorMessages.subject.style.display = 'block';
-        isValid = false;
-    }
-
-    // Message validation
-    const messageValue = formInputs.message.value.trim();
-    if (messageValue === '') {
-        errorMessages.message.textContent = 'Please enter a message';
-        errorMessages.message.style.display = 'block';
-        isValid = false;
-    } else if (messageValue.length < 10) {
-        errorMessages.message.textContent = 'Message must be at least 10 characters';
-        errorMessages.message.style.display = 'block';
-        isValid = false;
-    }
-
-    // If all validations pass
-    if (isValid) {
-        // Show success message
-        formSuccess.textContent = '✓ Message received! Thank you for reaching out. I will get back to you soon.';
-        formSuccess.classList.add('active');
-        formSuccess.classList.remove('hidden');
-
-        // Reset form
-        contactForm.reset();
-
-        // Hide success message after 5 seconds
-        setTimeout(() => {
-            formSuccess.classList.remove('active');
-            formSuccess.classList.add('hidden');
-        }, 5000);
-    }
-});
-
-/* ========================================
-   Prevent Excessive Animations for Reduced Motion
-   ======================================== */
-if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.documentElement.style.scrollBehavior = 'auto';
-    const style = document.createElement('style');
-    style.textContent = `
-        * {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-        }
-    `;
-    document.head.appendChild(style);
-}
-
-/* ========================================
-   Initialize Active Navigation Link on Page Load
-   ======================================== */
-document.addEventListener('DOMContentLoaded', () => {
-    updateActiveNavLink();
-});
-
-/* ========================================
-   Keyboard Navigation Support
-   ======================================== */
-document.addEventListener('keydown', (e) => {
-    // Escape key closes mobile menu
-    if (e.key === 'Escape' && navMenu.classList.contains('active')) {
-        menuToggle.classList.remove('active');
-        navMenu.classList.remove('active');
-    }
-
-    // Alt + T toggles mobile menu (accessibility shortcut)
-    if (e.altKey && e.key === 't') {
-        menuToggle.click();
-    }
-});
-
-/* ========================================
-   Accessibility: Skip to Main Content Link
-   ======================================== */
-// This is handled via keyboard navigation (Tab key)
-// Users can press Tab to navigate through interactive elements
-
-/* ========================================
-   Performance: Lazy Loading Support
-   ======================================== */
-// This enables lazy loading for images if needed
-if ('IntersectionObserver' in window && 'IntersectionObserverEntry' in window) {
-    const imageObserverOptions = {
-        threshold: 0.1
+const stats = document.querySelectorAll('[data-count]');
+const statsObserver = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const target = Number(entry.target.dataset.count);
+    const start = performance.now();
+    const tick = now => {
+        const progress = Math.min((now - start) / 900, 1);
+        entry.target.textContent = Math.floor(progress * target);
+        if (progress < 1) requestAnimationFrame(tick);
+        else entry.target.textContent = `${target}+`;
     };
+    requestAnimationFrame(tick);
+    statsObserver.unobserve(entry.target);
+}), { threshold: .8 });
+stats.forEach(stat => statsObserver.observe(stat));
 
-    const imageObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                if (img.dataset.src) {
-                    img.src = img.dataset.src;
-                    img.removeAttribute('data-src');
-                }
-                imageObserver.unobserve(img);
-            }
-        });
-    }, imageObserverOptions);
-
-    // You can use this by adding data-src instead of src to images
-    document.querySelectorAll('img[data-src]').forEach(img => {
-        imageObserver.observe(img);
+if (!isTouch && !prefersReducedMotion) {
+    const cursorDot = document.getElementById('cursorDot');
+    const cursorRing = document.getElementById('cursorRing');
+    let cursorX = 0; let cursorY = 0; let ringX = 0; let ringY = 0;
+    window.addEventListener('mousemove', event => { cursorX = event.clientX; cursorY = event.clientY; cursorDot.style.left = `${cursorX}px`; cursorDot.style.top = `${cursorY}px`; });
+    const animateCursor = () => { ringX += (cursorX - ringX) * .16; ringY += (cursorY - ringY) * .16; cursorRing.style.left = `${ringX}px`; cursorRing.style.top = `${ringY}px`; requestAnimationFrame(animateCursor); };
+    animateCursor();
+    document.querySelectorAll('a, button, .tilt-card, #neuralCanvas').forEach(element => {
+        element.addEventListener('mouseenter', () => cursorRing.classList.add('hover'));
+        element.addEventListener('mouseleave', () => cursorRing.classList.remove('hover'));
     });
 }
+
+if (!isTouch && !prefersReducedMotion) {
+    document.querySelectorAll('.tilt-card').forEach(card => {
+        card.addEventListener('mousemove', event => {
+            const box = card.getBoundingClientRect();
+            const x = (event.clientX - box.left) / box.width - .5;
+            const y = (event.clientY - box.top) / box.height - .5;
+            card.style.transform = `perspective(800px) rotateX(${y * -7}deg) rotateY(${x * 7}deg) translateY(-5px)`;
+        });
+        card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+    });
+}
+
+function createSpaceField() {
+    const canvas = document.getElementById('spaceCanvas');
+    const context = canvas.getContext('2d');
+    const density = isTouch ? 38 : 85;
+    const particles = [];
+    const resize = () => { canvas.width = window.innerWidth * devicePixelRatio; canvas.height = window.innerHeight * devicePixelRatio; context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0); };
+    resize(); window.addEventListener('resize', resize);
+    for (let index = 0; index < density; index += 1) particles.push({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, r: Math.random() * 1.3 + .25, speed: Math.random() * .18 + .04, alpha: Math.random() * .45 + .1 });
+    const draw = () => {
+        context.clearRect(0, 0, innerWidth, innerHeight);
+        particles.forEach(particle => { particle.y -= particle.speed; if (particle.y < -5) particle.y = innerHeight + 5; context.fillStyle = `rgba(115,231,219,${particle.alpha})`; context.beginPath(); context.arc(particle.x, particle.y, particle.r, 0, Math.PI * 2); context.fill(); });
+        if (!prefersReducedMotion) requestAnimationFrame(draw);
+    };
+    draw();
+}
+createSpaceField();
+
+function createNeuralField() {
+    const canvas = document.getElementById('neuralCanvas');
+    if (!window.THREE || !canvas) return;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, .1, 1000);
+    camera.position.z = 5.5;
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.7));
+    const group = new THREE.Group(); scene.add(group);
+    const nodes = [];
+    const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0x73e7db });
+    const nodeGeometry = new THREE.SphereGeometry(.045, 8, 8);
+    const nodeCount = isTouch ? 45 : 82;
+    for (let index = 0; index < nodeCount; index += 1) {
+        const theta = Math.acos(2 * Math.random() - 1);
+        const phi = Math.random() * Math.PI * 2;
+        const radius = 1.28 + (Math.random() - .5) * .22;
+        const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
+        node.position.set(radius * Math.sin(theta) * Math.cos(phi), radius * Math.sin(theta) * Math.sin(phi), radius * Math.cos(theta));
+        group.add(node); nodes.push(node);
+    }
+    const linePositions = [];
+    nodes.forEach((node, index) => nodes.slice(index + 1).forEach(other => { if (node.position.distanceTo(other.position) < .68) linePositions.push(node.position.x, node.position.y, node.position.z, other.position.x, other.position.y, other.position.z); }));
+    const lineGeometry = new THREE.BufferGeometry(); lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+    const lines = new THREE.LineSegments(lineGeometry, new THREE.LineBasicMaterial({ color: 0x73e7db, transparent: true, opacity: .27 })); group.add(lines);
+    const core = new THREE.Mesh(new THREE.IcosahedronGeometry(.55, 1), new THREE.MeshBasicMaterial({ color: 0x93b5ff, wireframe: true, transparent: true, opacity: .42 })); group.add(core);
+    const resize = () => { const box = canvas.parentElement.getBoundingClientRect(); renderer.setSize(box.width, box.height, false); camera.aspect = box.width / box.height; camera.updateProjectionMatrix(); };
+    resize(); window.addEventListener('resize', resize);
+    let targetX = 0; let targetY = 0;
+    canvas.addEventListener('pointermove', event => { const box = canvas.getBoundingClientRect(); targetX = ((event.clientX - box.left) / box.width - .5) * .55; targetY = ((event.clientY - box.top) / box.height - .5) * .45; });
+    canvas.addEventListener('pointerleave', () => { targetX = 0; targetY = 0; });
+    const render = () => { group.rotation.y += .0028; group.rotation.x += (targetY - group.rotation.x) * .025; group.rotation.z += (targetX - group.rotation.z) * .025; core.rotation.x -= .004; core.rotation.y += .006; renderer.render(scene, camera); if (!prefersReducedMotion) requestAnimationFrame(render); };
+    render();
+}
+createNeuralField();
+
+const journey = document.querySelector('.journey-line');
+const journeyProgress = document.querySelector('.journey-progress');
+const journeyNodes = [...document.querySelectorAll('.journey-node')];
+if (journey) {
+    const journeyObserver = new IntersectionObserver(entries => entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        journeyNodes.forEach((node, index) => window.setTimeout(() => node.classList.add('active'), index * 180));
+        journeyProgress.style.width = '100%';
+    }), { threshold: .4 });
+    journeyObserver.observe(journey);
+}
+
+const assistantPanel = document.getElementById('assistantPanel');
+assistantPanel.classList.remove('open');
+assistantPanel.setAttribute('aria-hidden', 'true');
+document.getElementById('assistantTrigger').addEventListener('click', () => { assistantPanel.classList.toggle('open'); assistantPanel.setAttribute('aria-hidden', String(!assistantPanel.classList.contains('open'))); });
+document.getElementById('assistantClose').addEventListener('click', () => assistantPanel.classList.remove('open'));
+const responses = {
+    'Who is Rushikesh?': 'Rushikesh is a third-year Computer Science Engineering student exploring AI, data and thoughtful software.',
+    'What are his skills?': 'His toolkit includes Python, JavaScript, ML, Data Science, Generative AI, AWS, MongoDB, REST APIs and Spring Boot.',
+    'Show me his projects.': 'Explore Village Hub, Smart Pulse Sensor and AI Chatbot in the selected work section.',
+    'What is his career goal?': 'He is working toward becoming an AI Engineer who builds practical, human-centered intelligent systems.'
+};
+document.querySelectorAll('.assistant-prompts button').forEach(button => button.addEventListener('click', () => {
+    const messages = document.getElementById('assistantMessages');
+    const question = button.dataset.question;
+    messages.insertAdjacentHTML('beforeend', `<p class="assistant-bubble user">${question}</p><p class="assistant-bubble">${responses[question]}</p>`);
+    messages.scrollTop = messages.scrollHeight;
+}));
+
+document.getElementById('contactForm').addEventListener('submit', event => {
+    event.preventDefault();
+    const status = document.getElementById('formStatus');
+    status.textContent = 'Message staged locally. Thanks for reaching out.';
+    event.target.reset();
+});
+
+document.querySelectorAll('.magnetic').forEach(element => {
+    if (isTouch || prefersReducedMotion) return;
+    element.addEventListener('mousemove', event => { const box = element.getBoundingClientRect(); element.style.transform = `translate(${(event.clientX - box.left - box.width / 2) * .12}px, ${(event.clientY - box.top - box.height / 2) * .12}px)`; });
+    element.addEventListener('mouseleave', () => { element.style.transform = ''; });
+});
