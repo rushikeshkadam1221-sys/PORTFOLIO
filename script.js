@@ -159,12 +159,70 @@ document.querySelectorAll('.assistant-prompts button').forEach(button => button.
     messages.scrollTop = messages.scrollHeight;
 }));
 
-document.getElementById('contactForm').addEventListener('submit', event => {
+const certificateModal = document.getElementById('certificateModal');
+const certificateImage = document.getElementById('certificateModalImage');
+const certificateTitle = document.getElementById('certificateModalTitle');
+const certificateOrg = document.getElementById('certificateModalOrg');
+const certificateClose = document.getElementById('certificateClose');
+const certificateBackdrop = document.getElementById('certificateBackdrop');
+
+const openCertificateModal = (card) => {
+    const image = card.dataset.image || card.querySelector('img')?.src || '';
+    const title = card.dataset.title || card.querySelector('h3')?.textContent || 'Certificate';
+    const org = card.dataset.org || card.querySelector('small')?.textContent || 'Organization';
+
+    certificateImage.src = image;
+    certificateImage.alt = `${title} certificate`;
+    certificateTitle.textContent = title;
+    certificateOrg.textContent = org;
+    certificateModal.classList.add('open');
+    certificateModal.setAttribute('aria-hidden', 'false');
+};
+
+const closeCertificateModal = () => {
+    certificateModal.classList.remove('open');
+    certificateModal.setAttribute('aria-hidden', 'true');
+};
+
+document.querySelectorAll('.certificate-card').forEach(card => {
+    card.addEventListener('click', () => openCertificateModal(card));
+    card.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openCertificateModal(card);
+        }
+    });
+});
+
+certificateClose.addEventListener('click', closeCertificateModal);
+certificateBackdrop.addEventListener('click', closeCertificateModal);
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && certificateModal.classList.contains('open')) closeCertificateModal();
+});
+
+document.getElementById('contactForm').addEventListener('submit', async event => {
     event.preventDefault();
-    const subject = encodeURIComponent(document.getElementById('subject').value);
-    const body = encodeURIComponent(`Name: ${document.getElementById('name').value}\nEmail: ${document.getElementById('email').value}\n\n${document.getElementById('message').value}`);
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=rushikeshkadam1221@gmail.com&su=${subject}&body=${body}`;
-    window.open(gmailUrl, '_blank', 'noopener,noreferrer');
+    const form = event.currentTarget;
+    const status = document.getElementById('formStatus');
+    const submitButton = form.querySelector('button[type="submit"]');
+    status.textContent = 'Sending...';
+    submitButton.disabled = true;
+
+    try {
+        const response = await fetch('/api/contact', {
+            body: JSON.stringify(Object.fromEntries(new FormData(form))),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST'
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Unable to send your message.');
+        status.textContent = result.message;
+        form.reset();
+    } catch (error) {
+        status.textContent = error.message || 'Unable to send your message. Please try again.';
+    } finally {
+        submitButton.disabled = false;
+    }
 });
 
 document.querySelectorAll('.magnetic').forEach(element => {
