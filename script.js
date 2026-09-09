@@ -209,14 +209,18 @@ document.getElementById('contactForm').addEventListener('submit', async event =>
     submitButton.disabled = true;
 
     try {
-        const response = await fetch('/api/contact', {
-            body: JSON.stringify(Object.fromEntries(new FormData(form))),
-            headers: { 'Content-Type': 'application/json' },
-            method: 'POST'
+        const response = await fetch('https://formspree.io/f/xaqkyjaz', {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'Accept': 'application/json' }
         });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || 'Unable to send your message.');
-        status.textContent = result.message;
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || 'Unable to send your message. Please try again.');
+        }
+
+        status.textContent = 'Message sent successfully!';
         form.reset();
     } catch (error) {
         status.textContent = error.message || 'Unable to send your message. Please try again.';
