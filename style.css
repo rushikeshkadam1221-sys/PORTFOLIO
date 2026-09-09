@@ -219,7 +219,7 @@ em { background: linear-gradient(110deg, var(--cyan), var(--lime)); background-c
 .skill-card h3 { font-size: 1.2rem; margin-bottom: 12px; }
 .skill-card p { color: var(--muted); font-size: .77rem; min-height: 42px; }
 .skill-list { border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 7px; margin-top: 22px; padding-top: 15px; }
-.skill-list span { background: rgba(255,255,255,.04); color: var(--soft); font-family: var(--mono); font-size: .57rem; padding: 4px 7px; }
+.skill-list span { background: rgba(255,255,255,.05); border: 1px solid rgba(115,231,219,.16); border-radius: 6px; color: var(--soft); font-family: var(--display); font-size: .72rem; font-weight: 600; letter-spacing: 0; line-height: 1.3; padding: 7px 10px; }
 
 .projects { overflow: hidden; }
 .project-grid { grid-template-columns: repeat(3, 1fr); }
