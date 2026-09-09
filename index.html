@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
     <div class="loader" id="loader" aria-label="Loading portfolio"><div class="loader-mark">RK</div><p>Initializing My Portfolio<span class="loader-dots">...</span></p><div class="loader-track"><span></span></div></div>
     <div class="cursor-dot" id="cursorDot"></div><div class="cursor-ring" id="cursorRing"></div><div class="ambient ambient-one"></div><div class="ambient ambient-two"></div><canvas id="spaceCanvas" aria-hidden="true"></canvas>
 
@@ -29,7 +30,7 @@
                 <p class="eyebrow"><span class="eyebrow-line"></span> Computer Science / 03</p>
                 <h1>Hi, I'm <em>Rushikesh Kadam.</em></h1>
                 <p class="hero-lede"><strong>Aspiring AI & Data Science Enthusiast | CSE Student</strong><br>Passionate about Artificial Intelligence, Data Science, Generative AI and Software Development.</p>
-                <div class="hero-actions"><a class="button button-bright magnetic" href="#projects">Explore my work <span>↓</span></a><a class="text-link" href="mainresume.pdf" download>Download resume <span>↓</span></a></div>
+                <div class="hero-actions"><a class="button button-bright magnetic" href="#projects">Explore my work <span>↓</span></a><button class="text-link resume-view-button" id="resumeTrigger" type="button">View resume <span>↗</span></button><a class="text-link" href="mainresume.pdf" download>Download resume <span>↓</span></a></div>
             </div>
             <div class="hero-stage reveal-up delay-one" id="heroStage"><div class="stage-chip">AI • DATA •<br>GENERATIVE AI</div><canvas id="neuralCanvas" aria-label="Interactive AI-inspired neural network visualization"></canvas><div class="stage-orbit orbit-one"></div><div class="stage-orbit orbit-two"></div></div>
         </section>
@@ -38,7 +39,7 @@
 
         <section class="about section-grid section-pad" id="about">
             <div class="section-intro reveal-up"><p class="eyebrow"><span class="eyebrow-line"></span> 01 / About me</p><h2>More than<br><em>a title.</em></h2><div class="portrait-wrap"><div class="portrait-glow"></div><div class="portrait-placeholder"><img class="profile-photo" src="profile.jpeg" alt="Rushikesh Kadam profile photo"></div><div class="portrait-ring"></div></div></div>
-            <div class="about-copy reveal-up delay-one"><p class="kicker">A curious mind, always learning.</p><h3>Making complex things feel <em>simple.</em></h3><p>Aspiring Artificial Intelligence and Science professional With a Strong interest in Machine Learning,Generative Al, and Data Analytics. Currently pursuing a B.Tech in Computer Science and Engineering and developing practical skills in Python, Java, data handling, and Al technologies. Passionate about using technology and data to solve real-qrorld problems and build intelligent applications.</p><div class="stats"><div><strong>AI</strong><span>AI & Data Science</span></div><div><strong>DEV</strong><span>Software Development</span></div><div><strong>GEN</strong><span>Generative AI</span></div><div><strong>∞</strong><span>Continuous learning</span></div></div></div>
+            <div class="about-copy reveal-up delay-one"><p class="kicker">A curious mind, always learning.</p><h3>Making complex things feel <em>simple.</em></h3><p>Motivated Computer Science Engineering student with a strong interest in Artificial Intelligence, Data Science, Generative AI, and Prompt Engineering. Possess knowledge of Python, MongoDB, and basic AI/ML concepts, with hands-on experience working on academic and personal projects. Passionate about exploring AI technologies, analyzing data, solving real-world problems, and building intelligent applications. Eager to learn and grow as an AI Engineer or Data Science professional while continuously developing technical and problem-solving skills.</p><div class="stats"><div><strong>AI</strong><span>AI & Data Science</span></div><div><strong>DEV</strong><span>Software Development</span></div><div><strong>GEN</strong><span>Generative AI</span></div><div><strong>∞</strong><span>Continuous learning</span></div></div></div>
         </section>
 
         <section class="skills section-pad" id="skills"><div class="section-heading reveal-up"><div><p class="eyebrow"><span class="eyebrow-line"></span> 02 / The toolkit</p><h2>Skills for<br><em>the journey.</em></h2></div><p>A growing toolkit shaped by practice, curiosity and a focus on useful technology.</p></div><div class="skills-grid reveal-up delay-one">
@@ -69,6 +70,17 @@
     </main>
 
     <footer><div class="footer-inner"><span>© 2026 Rushikesh Kadam</span><span>Aspiring AI & Data Science Enthusiast | CSE Student</span><a href="#home">Back to top ↑</a></div></footer>
+    <div class="resume-modal" id="resumeModal" aria-hidden="true">
+        <div class="modal-backdrop" id="resumeBackdrop"></div>
+        <div class="resume-modal-content" role="dialog" aria-modal="true" aria-labelledby="resumeModalTitle">
+            <div class="resume-modal-header">
+                <div><p class="eyebrow"><span class="eyebrow-line"></span> Resume</p><h2 id="resumeModalTitle">Rushikesh Kadam</h2></div>
+                <button class="modal-close" id="resumeClose" type="button" aria-label="Close resume preview">×</button>
+            </div>
+            <iframe src="mainresume.pdf" title="Rushikesh Kadam resume"></iframe>
+            <a class="button button-bright" href="mainresume.pdf" download>Download resume <span>↓</span></a>
+        </div>
+    </div>
     <div class="certificate-modal" id="certificateModal" aria-hidden="true">
         <div class="modal-backdrop" id="certificateBackdrop"></div>
         <div class="modal-content certificate-modal-content" role="dialog" aria-modal="true" aria-labelledby="certificateModalTitle">

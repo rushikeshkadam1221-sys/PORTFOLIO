@@ -7,6 +7,7 @@ window.addEventListener('load', () => window.setTimeout(() => loader.classList.a
 const header = document.getElementById('siteHeader');
 const nav = document.getElementById('siteNav');
 const menuToggle = document.getElementById('menuToggle');
+const scrollProgress = document.getElementById('scrollProgress');
 const navLinks = [...document.querySelectorAll('.nav-link')];
 menuToggle.addEventListener('click', () => {
     const open = nav.classList.toggle('open');
@@ -24,8 +25,11 @@ const updateScrollState = () => {
     header.classList.toggle('scrolled', window.scrollY > 35);
     const current = sections.reduce((active, section) => window.scrollY >= section.offsetTop - 180 ? section.id : active, 'home');
     navLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === `#${current}`));
+    const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+    scrollProgress.style.transform = `scaleX(${scrollableHeight > 0 ? window.scrollY / scrollableHeight : 0})`;
 };
 window.addEventListener('scroll', updateScrollState, { passive: true });
+window.addEventListener('resize', updateScrollState);
 updateScrollState();
 
 document.querySelectorAll('.reveal-up').forEach(element => {
@@ -198,6 +202,28 @@ certificateClose.addEventListener('click', closeCertificateModal);
 certificateBackdrop.addEventListener('click', closeCertificateModal);
 document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && certificateModal.classList.contains('open')) closeCertificateModal();
+});
+
+const resumeModal = document.getElementById('resumeModal');
+const resumeTrigger = document.getElementById('resumeTrigger');
+const resumeClose = document.getElementById('resumeClose');
+const resumeBackdrop = document.getElementById('resumeBackdrop');
+
+const closeResumeModal = () => {
+    resumeTrigger.focus();
+    resumeModal.classList.remove('open');
+    resumeModal.setAttribute('aria-hidden', 'true');
+};
+
+resumeTrigger.addEventListener('click', () => {
+    resumeModal.classList.add('open');
+    resumeModal.setAttribute('aria-hidden', 'false');
+    resumeClose.focus();
+});
+resumeClose.addEventListener('click', closeResumeModal);
+resumeBackdrop.addEventListener('click', closeResumeModal);
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && resumeModal.classList.contains('open')) closeResumeModal();
 });
 
 document.getElementById('contactForm').addEventListener('submit', async event => {
