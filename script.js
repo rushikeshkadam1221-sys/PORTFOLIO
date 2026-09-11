@@ -146,15 +146,20 @@ if (journey) {
 }
 
 const assistantPanel = document.getElementById('assistantPanel');
+const assistantTrigger = document.getElementById('assistantTrigger');
 assistantPanel.classList.remove('open');
 assistantPanel.setAttribute('aria-hidden', 'true');
-document.getElementById('assistantTrigger').addEventListener('click', () => { assistantPanel.classList.toggle('open'); assistantPanel.setAttribute('aria-hidden', String(!assistantPanel.classList.contains('open'))); });
-document.getElementById('assistantClose').addEventListener('click', () => assistantPanel.classList.remove('open'));
+assistantTrigger.addEventListener('click', () => { const open = assistantPanel.classList.toggle('open'); assistantPanel.setAttribute('aria-hidden', String(!open)); assistantTrigger.setAttribute('aria-expanded', String(open)); });
+document.getElementById('assistantClose').addEventListener('click', () => { assistantPanel.classList.remove('open'); assistantPanel.setAttribute('aria-hidden', 'true'); assistantTrigger.setAttribute('aria-expanded', 'false'); });
 const responses = {
     'Who is Rushikesh?': 'Rushikesh is a third-year Computer Science Engineering student exploring AI, data and thoughtful software.',
     'What are his skills?': 'His toolkit includes Python, JavaScript, ML, Data Science, Generative AI, AWS, MongoDB, REST APIs and Spring Boot.',
     'Show me his projects.': 'Explore Village Hub, Smart Pulse Sensor and AI Chatbot in the selected work section.',
-    'What is his career goal?': 'He is working toward becoming an AI Engineer who builds practical, human-centered intelligent systems.'
+    'What is his career goal?': 'He is working toward becoming an AI Engineer who builds practical, human-centered intelligent systems.',
+    'What is he studying?': 'He is pursuing a Bachelor of Technology in Computer Science and Engineering at SVERI\'s College of Engineering.',
+    'Tell me about his experience.': 'He has facilitated an online Generative AI and Prompt Engineering workshop, helping students learn practical prompting techniques.',
+    'What certifications does he have?': 'His certifications include OOPs Through Java, C++ Programming, Data Structure in C and Learn Python.',
+    'How can I contact him?': 'You can connect through the Contact section using GitHub, LinkedIn or the email form.'
 };
 document.querySelectorAll('.assistant-prompts button').forEach(button => button.addEventListener('click', () => {
     const messages = document.getElementById('assistantMessages');
