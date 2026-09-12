@@ -87,10 +87,17 @@ function createSpaceField() {
     const particles = [];
     const resize = () => { canvas.width = window.innerWidth * devicePixelRatio; canvas.height = window.innerHeight * devicePixelRatio; context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0); };
     resize(); window.addEventListener('resize', resize);
-    for (let index = 0; index < density; index += 1) particles.push({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, r: Math.random() * 1.3 + .25, speed: Math.random() * .18 + .04, alpha: Math.random() * .45 + .1 });
+    for (let index = 0; index < density; index += 1) particles.push({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, r: Math.random() * 1.3 + .25, speed: Math.random() * .18 + .04, alpha: Math.random() * .45 + .1, depth: Math.random() * .8 + .2 });
+    let pointerX = 0;
+    let pointerY = 0;
+    window.addEventListener('pointermove', event => {
+        if (event.pointerType === 'touch') return;
+        pointerX = (event.clientX / innerWidth - .5) * 12;
+        pointerY = (event.clientY / innerHeight - .5) * 8;
+    }, { passive: true });
     const draw = () => {
         context.clearRect(0, 0, innerWidth, innerHeight);
-        particles.forEach(particle => { particle.y -= particle.speed; if (particle.y < -5) particle.y = innerHeight + 5; context.fillStyle = `rgba(115,231,219,${particle.alpha})`; context.beginPath(); context.arc(particle.x, particle.y, particle.r, 0, Math.PI * 2); context.fill(); });
+        particles.forEach(particle => { particle.y -= particle.speed; if (particle.y < -5) particle.y = innerHeight + 5; context.fillStyle = `rgba(115,231,219,${particle.alpha})`; context.beginPath(); context.arc(particle.x + pointerX * particle.depth, particle.y + pointerY * particle.depth, particle.r, 0, Math.PI * 2); context.fill(); });
         if (!prefersReducedMotion) requestAnimationFrame(draw);
     };
     draw();
@@ -107,7 +114,7 @@ function createNeuralField() {
     renderer.setPixelRatio(Math.min(devicePixelRatio, 1.7));
     const group = new THREE.Group(); scene.add(group);
     const nodes = [];
-    const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0x73e7db });
+    const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0x73e7db, transparent: true });
     const nodeGeometry = new THREE.SphereGeometry(.045, 8, 8);
     const nodeCount = isTouch ? 45 : 82;
     for (let index = 0; index < nodeCount; index += 1) {
@@ -116,6 +123,8 @@ function createNeuralField() {
         const radius = 1.28 + (Math.random() - .5) * .22;
         const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
         node.position.set(radius * Math.sin(theta) * Math.cos(phi), radius * Math.sin(theta) * Math.sin(phi), radius * Math.cos(theta));
+        node.userData.phase = Math.random() * Math.PI * 2;
+        node.userData.baseScale = .72 + Math.random() * .65;
         group.add(node); nodes.push(node);
     }
     const linePositions = [];
@@ -128,7 +137,21 @@ function createNeuralField() {
     let targetX = 0; let targetY = 0;
     canvas.addEventListener('pointermove', event => { const box = canvas.getBoundingClientRect(); targetX = ((event.clientX - box.left) / box.width - .5) * .55; targetY = ((event.clientY - box.top) / box.height - .5) * .45; });
     canvas.addEventListener('pointerleave', () => { targetX = 0; targetY = 0; });
-    const render = () => { group.rotation.y += .0028; group.rotation.x += (targetY - group.rotation.x) * .025; group.rotation.z += (targetX - group.rotation.z) * .025; core.rotation.x -= .004; core.rotation.y += .006; renderer.render(scene, camera); if (!prefersReducedMotion) requestAnimationFrame(render); };
+    const render = () => {
+        const time = performance.now() * .001;
+        group.rotation.y += .0028;
+        group.rotation.x += (targetY - group.rotation.x) * .025;
+        group.rotation.z += (targetX - group.rotation.z) * .025;
+        nodes.forEach(node => {
+            const pulse = node.userData.baseScale + Math.sin(time * 1.6 + node.userData.phase) * .16;
+            node.scale.setScalar(pulse);
+            nodeMaterial.opacity = .72 + Math.sin(time * 1.1 + node.userData.phase) * .18;
+        });
+        core.rotation.x -= .004;
+        core.rotation.y += .006;
+        renderer.render(scene, camera);
+        if (!prefersReducedMotion) requestAnimationFrame(render);
+    };
     render();
 }
 createNeuralField();
